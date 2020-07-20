@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Jewellery Try On</title>
+  <style>
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      text-align:center;
+    }
+
+    .loader {
+      background-image: url('./images/loader/loader3.svg');
+      background-size: auto;
+      background-repeat: no-repeat;
+      background-position: center center;
+      height: 100vh;
+    }
+
+    .loader>* {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body class="loader">
+  <video id="_webcam" style="display: none;" playsinline></video>
+  <div id="_canvas_container"></div>
+  <img id="JewelleryToTry" style="display: none;"/>
+
+  <script src="./javascripts/brfv5_js_tk240320_v5.1.5_trial_no_modules.js"></script>
+  <script src="./javascripts/index.js"></script>
+
+  <script>
+    // Set the BRFv5 library name here, also set your own appId for reference.
+    const _libraryName = 'brfv5_js_tk240320_v5.1.5_trial.brfv5'
+    const _appId = 'brfv5.browser.minimal.nomodules' // (mandatory): 8 to 64 characters, a-z . 0-9 allowed
+    const brfv5 = {} // The library namespace.
+    // Those variables will be retrieved from the stream and the library.
+    let _brfv5Manager = null
+    let _brfv5Config = null
+    let _width = 0
+    let _height = 0
+    // loadBRFv5Model and openCamera are being done simultaneously thanks to Promises. Both call
+    // configureTracking which only gets executed once both Promises were successful. Once configured
+    // trackFaces will do the tracking work and draw the results.
+    const loadBRFv5Model = (modelName, numChunksToLoad, pathToModels = '', appId = null, onProgress = null) => {
+      console.log('loadBRFv5Model')
+      if (!modelName) {
+        throw 'Please provide a modelName.'
+      }
+      return new Promise((resolve, reject) => {
+        if (_brfv5Manager && _brfv5Config) {
+          resolve({
+            brfv5Manager: _brfv5Manager,
+            brfv5Config: _brfv5Config
+          })
+        } else {
+          try {
+            brfv5.appId = appId ? appId : _appId
+            brfv5.binaryLocation = pathToModels + _libraryName
+            brfv5.modelLocation = pathToModels + modelName + '_c'
+            brfv5.modelChunks = numChunksToLoad // 4, 6, 8
+            brfv5.binaryProgress = onProgress
+            brfv5.binaryError = (e) => {
+              reject(e)
+            }
+            brfv5.onInit = (brfv5Manager, brfv5Config) => {
+              _brfv5Manager = brfv5Manager
+              _brfv5Config = brfv5Config
+              resolve({
+                brfv5Manager: _brfv5Manager,
+                brfv5Config: _brfv5Config
+              })
+            }
+            brfv5Module(brfv5)
+          } catch (e) {
+            reject(e)
+          }
+        }
+      })
+    }
+    const openCamera = () => {
+      console.log('openCamera')
+      return new Promise((resolve, reject) => {
+        window.navigator.mediaDevices.getUserMedia({
+            video: {
+              width: 640,
+              height: 480,
+              frameRate: 30,
+              facingMode: 'user'
+            }
+          })
+          .then((mediaStream) => {
+            _webcam.srcObject = mediaStream
+            _webcam.play().then(() => {
+              resolve({
+                width: _webcam.videoWidth,
+                height: _webcam.videoHeight
+              })
+            }).catch((e) => {
+              reject(e)
+            })
+          }).catch((e) => {
+            reject(e)
+          })
+      })
+    }
+    const configureTracking = () => {
+      if (_brfv5Config !== null && _width > 0) {
+        // Camera stream and BRFv5 are ready. Now configure. Internal defaults are set for a 640x480 resolution.
+        // So the following isn't really necessary.
+        const brfv5Config = _brfv5Config
+        const imageWidth = _width
+        const imageHeight = _height
+        const inputSize = imageWidth > imageHeight ? imageHeight : imageWidth
+        // Setup image data dimensions
+        brfv5Config.imageConfig.inputWidth = imageWidth
+        brfv5Config.imageConfig.inputHeight = imageHeight
+        const sizeFactor = inputSize / 480.0
+        // Set face detection region of interest and parameters scaled to the image base size.
+        brfv5Config.faceDetectionConfig.regionOfInterest.setTo(0, 0, imageWidth, imageHeight)
+        brfv5Config.faceDetectionConfig.minFaceSize = 144 * sizeFactor
+        brfv5Config.faceDetectionConfig.maxFaceSize = 480 * sizeFactor
+        if (imageWidth < imageHeight) {
+          // Portrait mode: probably smartphone, faces tend to be closer to the camera, processing time is an issue,
+          // so save a bit of time and increase minFaceSize.
+          brfv5Config.faceDetectionConfig.minFaceSize = 240 * sizeFactor
+        }
+        // Set face tracking region of interest and parameters scaled to the image base size.
+        brfv5Config.faceTrackingConfig.regionOfInterest.setTo(0, 0, imageWidth, imageHeight)
+        brfv5Config.faceTrackingConfig.minFaceScaleStart = 50.0 * sizeFactor
+        brfv5Config.faceTrackingConfig.maxFaceScaleStart = 320.0 * sizeFactor
+        brfv5Config.faceTrackingConfig.minFaceScaleReset = 35.0 * sizeFactor
+        brfv5Config.faceTrackingConfig.maxFaceScaleReset = 420.0 * sizeFactor
+        brfv5Config.faceTrackingConfig.confidenceThresholdReset = 0.001
+        brfv5Config.faceTrackingConfig.enableStabilizer = true
+        brfv5Config.faceTrackingConfig.maxRotationXReset = 35.0
+        brfv5Config.faceTrackingConfig.maxRotationYReset = 45.0
+        brfv5Config.faceTrackingConfig.maxRotationZReset = 34.0
+        brfv5Config.faceTrackingConfig.numTrackingPasses = 3
+        brfv5Config.faceTrackingConfig.enableFreeRotation = true
+        brfv5Config.faceTrackingConfig.maxRotationZReset = 999.0
+        brfv5Config.faceTrackingConfig.numFacesToTrack = 1
+        brfv5Config.enableFaceTracking = true
+        //console.log('configureTracking:', _brfv5Config)
+        _brfv5Manager.configure(_brfv5Config)
+        document.getElementsByTagName('body')[0].classList.remove('loader');
+        trackFaces()
+      }
+    }
+    const trackFaces = () => {
+      if (!_brfv5Manager || !_brfv5Config || !_imageData) {
+        return
+      }
+      const ctx = _imageData.getContext('2d')
+      ctx.setTransform(-1.0, 0, 0, 1, _width, 0) // A virtual mirror should be... mirrored
+      ctx.drawImage(_webcam, 0, 0, _width, _height)
+      ctx.setTransform(1.0, 0, 0, 1, 0, 0) // unmirror to draw the results
+      _brfv5Manager.update(ctx.getImageData(0, 0, _width, _height))
+      let doDrawFaceDetection = !_brfv5Config.enableFaceTracking
+      if (_brfv5Config.enableFaceTracking) {
+        const sizeFactor = Math.min(_width, _height) / 480.0
+        const faces = _brfv5Manager.getFaces()
+        for (let i = 0; i < faces.length; i++) {
+          const face = faces[i]
+          if (face.state === brfv5.BRFv5State.FACE_TRACKING) {
+            //drawRect(ctx, _brfv5Config.faceTrackingConfig.regionOfInterest, '#00a0ff', 2.0)
+            //drawCircles(ctx, face.landmarks, '#00a0ff', 2.0 * sizeFactor)
+            //drawRect(ctx, face.bounds, '#ffffff', 1.0)
+            processLandmarksCallback(ctx, face.landmarks, '#00a0ff', 2.0 * sizeFactor);
+          }
+        }
+      }
+      requestAnimationFrame(trackFaces)
+    }
+    openCamera().then(({
+      width,
+      height
+    }) => {
+      //console.log('openCamera: done: ' + width + 'x' + height)
+      _width = width;
+      _height = height;
+      _imageData.width = _width
+      _imageData.height = _height
+      if(FULLSCREEN == true){
+        _imageData.style.width = "100vw";
+        _imageData.style.height = "100vh";
+      }
+      configureTracking()
+    }).catch((e) => {
+      if (e) {
+        cameraFailedCallback(e);
+      }
+    })
+    loadBRFv5Model('68l', 8, BRFv5ModelPath, _appId,
+      (progress) => {
+        modelLoadingProgress(progress);
+      }).then(({
+      brfv5Manager,
+      brfv5Config
+    }) => {
+      modelLoadingCompleted();
+      _brfv5Manager = brfv5Manager
+      _brfv5Config = brfv5Config
+      configureTracking()
+    }).catch((e) => {
+      modelLoadingFailedCallback(e);
+    })
+    const drawCircles = (ctx, array, color, radius) => {
+      ctx.strokeStyle = null
+      ctx.fillStyle = getColor(color, 1.0)
+      let _radius = radius || 2.0
+      for (let i = 0; i < array.length; ++i) {
+        ctx.beginPath()
+        ctx.arc(array[i].x, array[i].y, _radius, 0, 2 * Math.PI)
+        ctx.fill()
+      }
+    }
+    const drawRect = (ctx, rect, color, lineWidth) => {
+      ctx.strokeStyle = getColor(color, 1.0)
+      ctx.fillStyle = null
+      ctx.lineWidth = lineWidth || 1.0
+      ctx.beginPath()
+      ctx.rect(rect.x, rect.y, rect.width, rect.height)
+      ctx.stroke()
+    }
+    const drawRects = (ctx, rects, color, lineWidth) => {
+      ctx.strokeStyle = getColor(color, 1.0)
+      ctx.fillStyle = null
+      ctx.lineWidth = lineWidth || 1.0
+      for (let i = 0; i < rects.length; ++i) {
+        let rect = rects[i]
+        ctx.beginPath()
+        ctx.rect(rect.x, rect.y, rect.width, rect.height)
+        ctx.stroke()
+      }
+    }
+
+    const getColor = (color, alpha) => {
+      const colorStr = color + ''
+      if (colorStr.startsWith('rgb')) {
+        return color
+      }
+      if (colorStr.startsWith('#')) {
+        color = parseInt('0x' + colorStr.substr(1))
+      }
+      return 'rgb(' +
+        (((color >> 16) & 0xff).toString(10)) + ', ' +
+        (((color >> 8) & 0xff).toString(10)) + ', ' +
+        (((color) & 0xff).toString(10)) + ', ' + alpha + ')'
+    }
+  </script>
+</body>
+
+</html>

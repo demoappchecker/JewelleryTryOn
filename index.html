@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Jewellery App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.css">
+  <style>
+    .animate01:hover {
+      transform: scale(1.005);
+    }
+
+    .loader {
+      background-image: url('./images/loader/loader3.svg');
+      background-size: auto;
+      background-repeat: no-repeat;
+      background-position: center center;
+      height: 100vh;
+    }
+
+    .loader>* {
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body class="loader">
+  <div class="container">
+    <div class="row">
+      <div class="col s12 center-align">
+        <h4>Jewellery Try On</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12">
+        <hr class="grey-text text-lighten-5" />
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col s12 m6 l6">
+        <a href="tryon.html?imageurl=images/jewellery/earring01.png&imagetype=EARRING&fullscreen=false&verbose=true"
+          target="_blank">
+          <div class="card-panel grey lighten-5 z-depth-1 animate01">
+            <div class="row valign-wrapper">
+              <div class="col s2">
+                <img src="images/jewellery/earring01.png" alt="" class="circle responsive-img">
+                <!-- notice the "circle" class -->
+              </div>
+              <div class="col s10">
+                <span class="black-text">
+                  Details Regarding the Jewellery<br />
+                  Rs. ----
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col s12 m6 l6">
+        <a href="tryon.html?imageurl=images/jewellery/earring02.png&imagetype=EARRING&fullscreen=false&verbose=false"
+          target="_blank">
+          <div class="card-panel grey lighten-5 z-depth-1 animate01">
+            <div class="row valign-wrapper">
+              <div class="col s2">
+                <img src="images/jewellery/earring02.png" alt="" class="circle responsive-img">
+                <!-- notice the "circle" class -->
+              </div>
+              <div class="col s10">
+                <span class="black-text">
+                  Details Regarding the Jewellery<br />
+                  Rs. ----
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s12 m6 l6">
+        <a href="tryon.html?imageurl=images/jewellery/earring03.png&imagetype=EARRING&fullscreen=true&verbose=true"
+          target="_blank">
+          <div class="card-panel grey lighten-5 z-depth-1 animate01">
+            <div class="row valign-wrapper">
+              <div class="col s2">
+                <img src="images/jewellery/earring03.png" alt="" class="circle responsive-img">
+                <!-- notice the "circle" class -->
+              </div>
+              <div class="col s10">
+                <span class="black-text">
+                  Details Regarding the Jewellery<br />
+                  Rs. ----
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col s12 m6 l6">
+        <a href="tryon.html?imageurl=images/jewellery/earring04.png&imagetype=EARRING&fullscreen=true&verbose=false"
+          target="_blank">
+          <div class="card-panel grey lighten-5 z-depth-1 animate01">
+            <div class="row valign-wrapper">
+              <div class="col s2">
+                <img src="images/jewellery/earring04.png" alt="" class="circle responsive-img">
+                <!-- notice the "circle" class -->
+              </div>
+              <div class="col s10">
+                <span class="black-text">
+                  Details Regarding the Jewellery<br />
+                  Rs. ----
+                </span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row">
+      <div class="col s12">
+        <span class="left-text red-text"><b>NOTE :</b> Please click on the jewellery for trying it on a virtual
+          mirror</span><br />
+        <span class="left-text red-text"><b>NOTE :</b> The '<b>tryonpage.html</b>' accepts the following parameters :-</span><br />
+        <div class="left-text blue-text">
+          <style>
+            table, th, td {
+              padding: 10px;
+            }
+
+          </style>
+          <table>
+            <tr>
+              <td>&emsp;</td>
+              <td>imageurl</td>
+              <td>&emsp;:&emsp;</td>
+              <td>The URL of the Jewellery(Earring Only) Image to Virtually Try on.</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>imagetype</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Image type(EARRING).</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>fullscreen</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Can be 'true'/'false'. If set to true it will display the try on mirror in full screen. It's default value is set to 
+                'true'.</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>verbose</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Can be 'true'/'false'. If set to true it will display additional info on mirror. It's default value is set to 
+                'false' .</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>EDT</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Can be a value between 0 and 1. It is a threshold value which determines which all ears are visible
+                based on the rotation calculated
+                by the system. It's default value is set to 0.28 .
+              </td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>EPT</td>
+              <td>&emsp;:&emsp;</td>
+              <td>It can be used to displace the earring images from calculated placement positions. It's default value
+                is set to 5 .</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>FTT</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Can be a value between 0 and 1. It is used to set the face tilt that is acceptable. It's default value
+                is set to 0.25 .</td>
+            </tr>
+            <tr>
+              <td>&emsp;</td>
+              <td>JScale</td>
+              <td>&emsp;:&emsp;</td>
+              <td>Can be a value between 0 and 1. It is used to adjust the size of the jewellery image. It's default
+                value is set to 0.5 .</td>
+            </tr>
+          </table>
+          <span class="left-text blue-text"><br/><i>Parameters having default values is optional.</i></span>
+        </div><br />
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+  <script>
+    window.onload = function () {
+      document.getElementsByTagName("body")[0].classList.remove('loader');
+    }
+  </script>
+</body>
+
+</html>
